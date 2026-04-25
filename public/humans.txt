@@ -1,0 +1,18 @@
+/* TEAM */
+Owner: Renew EcoMe LLC
+Contact: chris@smartertariff.com
+Location: Cape Elizabeth, ME, USA
+
+/* SITE */
+Name: DigitalContinuity.ai · Beta · Hub Preview
+Status: Prototype — beta only
+Last update: 2026-04
+Made with: Vite, React 18, TypeScript, Tailwind v3, React Router v6
+Hosted on: Vercel
+
+/* NOTES */
+This is a prototype-grade beta. No live API calls; all data is fixture-only.
+The site is intentionally indexed as `noindex, nofollow, noarchive`.
+Patent pending on the methodology powering Checkout Audit / Agentic Commerce Readiness.
+Scoring weights, signal-detection logic, and criterion→revenue mapping are intentionally not exposed.
+For feedback, email chris@smartertariff.com.
