@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Btn } from "@/components/atoms/Btn";
 import { Pill } from "@/components/atoms/Pill";
@@ -37,11 +37,14 @@ export default function HubPage() {
   const tool = TOOLS.find((t) => t.key === active)!;
   const fixture = TOOL_FIXTURES[active];
 
-  const setActive = (key: ToolKey) => {
-    const next = new URLSearchParams(searchParams);
-    next.set("tool", key);
-    setSearchParams(next, { replace: false });
-  };
+  const setActive = useCallback(
+    (key: ToolKey) => {
+      const next = new URLSearchParams(searchParams);
+      next.set("tool", key);
+      setSearchParams(next, { replace: false });
+    },
+    [searchParams, setSearchParams],
+  );
 
   // Keyboard arrow navigation across the sidebar tool list (when focus is on a side-item)
   const sidebarRef = useRef<HTMLElement | null>(null);
@@ -68,7 +71,6 @@ export default function HubPage() {
     }
     el.addEventListener("keydown", onKey);
     return () => el.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setActive]);
 
   const lockup =
