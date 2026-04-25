@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { BetaBanner } from "@/components/atoms/BetaBanner";
+import { VariantsPanel } from "@/components/VariantsPanel";
 import LandingPage from "@/pages/LandingPage";
 import PlatformPage from "@/pages/PlatformPage";
 import HubPage from "@/pages/HubPage";
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/about-this-beta" element={<AboutThisBetaPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      <VariantsPanel />
     </>
   );
 }
