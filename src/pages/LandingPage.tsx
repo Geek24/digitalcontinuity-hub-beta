@@ -577,7 +577,7 @@ function DashboardPreview({ compact, onDark }: { compact?: boolean; onDark?: boo
           <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 10, color: muted }}>24 issues · 4/4 dimensions · SDG 2/17</div>
             <div style={{ fontSize: 9, color: muted, marginTop: 2 }}>
-              scanned 20× · +53 since last
+              scanned · +new since last
             </div>
           </div>
         </div>

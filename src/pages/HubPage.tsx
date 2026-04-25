@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Btn } from "@/components/atoms/Btn";
 import { Pill } from "@/components/atoms/Pill";
 import { ToolGlyph } from "@/components/atoms/ToolGlyph";
@@ -6,23 +7,69 @@ import { Eyebrow } from "@/components/atoms/Eyebrow";
 import { MonoCall } from "@/components/atoms/MonoCall";
 import { ScoreBar } from "@/components/atoms/ScoreBar";
 import { ThemeSwitcher } from "@/components/atoms/ThemeSwitcher";
+import { UnifiedScanCard } from "@/components/UnifiedScanCard";
 import { useTweaks } from "@/lib/tweaks";
 import {
   TOOLS,
-  HUB_PRIORITIES,
   HUB_TOOL_STATS,
   HUB_DIMENSION_ROWS,
-  AGENTIC_READINESS,
+  TOOL_FIXTURES,
   PLAN,
   ACCOUNT,
   type ToolKey,
+  type Tool,
+  type ToolFixture,
 } from "@/lib/fixtures";
+
+const TOOL_KEYS: ToolKey[] = TOOLS.map((t) => t.key);
+
+function isToolKey(v: string | null | undefined): v is ToolKey {
+  return v != null && (TOOL_KEYS as string[]).includes(v);
+}
 
 export default function HubPage() {
   const { tweaks } = useTweaks();
   const { brandProminence, density } = tweaks;
-  const [active, setActive] = useState<ToolKey>("checkout");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeFromUrl = searchParams.get("tool");
+  const active: ToolKey = isToolKey(activeFromUrl) ? activeFromUrl : "checkout";
   const tool = TOOLS.find((t) => t.key === active)!;
+  const fixture = TOOL_FIXTURES[active];
+
+  const setActive = (key: ToolKey) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("tool", key);
+    setSearchParams(next, { replace: false });
+  };
+
+  // Keyboard arrow navigation across the sidebar tool list (when focus is on a side-item)
+  const sidebarRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const el = sidebarRef.current;
+    if (!el) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      const target = document.activeElement;
+      if (!target || !(target instanceof HTMLElement)) return;
+      if (!el!.contains(target)) return;
+      if (!target.dataset.toolKey) return;
+      e.preventDefault();
+      const idx = TOOL_KEYS.indexOf(target.dataset.toolKey as ToolKey);
+      if (idx === -1) return;
+      const nextIdx =
+        e.key === "ArrowDown"
+          ? (idx + 1) % TOOL_KEYS.length
+          : (idx - 1 + TOOL_KEYS.length) % TOOL_KEYS.length;
+      const nextKey = TOOL_KEYS[nextIdx];
+      const nextEl = el!.querySelector<HTMLElement>(`[data-tool-key="${nextKey}"]`);
+      nextEl?.focus();
+      setActive(nextKey);
+    }
+    el.addEventListener("keydown", onKey);
+    return () => el.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setActive]);
 
   const lockup =
     brandProminence === "st-only" ? (
@@ -34,7 +81,9 @@ export default function HubPage() {
         <span className="brand serif" style={{ fontSize: 14 }}>
           DigitalContinuity
         </span>
-        <span style={{ fontSize: 11, color: "var(--text-muted)" }}>.ai</span>
+        {brandProminence !== "dc-only" && (
+          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>.ai</span>
+        )}
       </>
     );
 
@@ -43,7 +92,6 @@ export default function HubPage() {
       className={`artboard ${density === "dense" ? "dense" : "sparse"}`}
       style={{ display: "flex", flexDirection: "column", flex: 1 }}
     >
-      {/* slim app bar */}
       <header
         style={{
           height: 44,
@@ -94,9 +142,7 @@ export default function HubPage() {
       </header>
 
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-        {/* sidebar */}
-        <aside className="sidebar" aria-label="App navigation">
-          {/* hero banner: ONE SCAN / ONE SURFACE */}
+        <aside ref={sidebarRef} className="sidebar" aria-label="App navigation">
           <div
             style={{
               margin: "0 12px 14px",
@@ -151,7 +197,7 @@ export default function HubPage() {
             >
               ▶
             </span>
-            <span style={{ fontWeight: 600 }}>Run Checkout scan</span>
+            <span style={{ fontWeight: 600 }}>Run {tool.label} scan</span>
             <span className="badge">⌘R</span>
           </button>
           <button type="button" className="side-item">
@@ -185,16 +231,16 @@ export default function HubPage() {
           <PlanFooter />
         </aside>
 
-        {/* main canvas */}
         <main
           id="main"
           style={{
             flex: 1,
             padding: density === "dense" ? "16px 22px" : "26px 32px",
             overflow: "auto",
+            transition: "opacity 150ms ease-out",
           }}
+          key={active}
         >
-          {/* breadcrumb + actions */}
           <div className="row between itemsCenter" style={{ marginBottom: 14, flexWrap: "wrap", gap: 12 }}>
             <div className="row gap-2 itemsCenter">
               <ToolGlyph t={tool} size={26} />
@@ -213,7 +259,7 @@ export default function HubPage() {
                     · entry point
                   </span>
                 </h1>
-                <MonoCall>{tool.oneLiner} — fires all 7 audits in one pass</MonoCall>
+                <MonoCall>{fixture.oneLiner} — fires all 7 audits in one pass</MonoCall>
               </div>
             </div>
             <div className="row gap-2">
@@ -223,7 +269,6 @@ export default function HubPage() {
             </div>
           </div>
 
-          {/* WHY CHECKOUT strip */}
           <div
             className="card"
             style={{
@@ -240,11 +285,10 @@ export default function HubPage() {
                   className="mono-call"
                   style={{ fontSize: 9, color: "var(--accent)", marginBottom: 2 }}
                 >
-                  ★ WHY CHECKOUT
+                  ★ WHY {tool.label.toUpperCase()}
                 </div>
                 <div className="serif" style={{ fontSize: 14, lineHeight: 1.2 }}>
-                  Commerce × climate,{" "}
-                  <em style={{ color: "var(--accent)" }}>at one critical point.</em>
+                  {fixture.whyTitle}
                 </div>
               </div>
               <div
@@ -256,10 +300,7 @@ export default function HubPage() {
                   minWidth: 280,
                 }}
               >
-                Checkout is where regulatory exposure (WCAG, EAA, UFLPA), operational risk (iframe
-                failures), and AI-agent visibility (whether Google or ChatGPT will even surface
-                you) all collide. We're the only audit that scores all three at once — plus the
-                upstream supply chain that feeds into it.
+                {fixture.whyCopy}
               </div>
               <div className="row gap-2" style={{ flex: "0 0 auto" }}>
                 <Stat n="7" label="AUDITS" />
@@ -269,40 +310,8 @@ export default function HubPage() {
             </div>
           </div>
 
-          {/* unified scan bar */}
-          <div
-            className="card"
-            style={{
-              padding: 10,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              marginBottom: 14,
-              flexWrap: "wrap",
-            }}
-          >
-            <MonoCall>scan ›</MonoCall>
-            <span
-              style={{
-                flex: 1,
-                padding: "6px 0",
-                fontFamily: "var(--font-mono)",
-                fontSize: 13,
-                minWidth: 200,
-              }}
-            >
-              checkout.shopify.com
-              <span className="cursor" aria-hidden>
-                |
-              </span>
-            </span>
-            <Pill tone="reg">Regulatory</Pill>
-            <Pill tone="op">Operational</Pill>
-            <Pill tone="rep">Reputational</Pill>
-            <Btn variant="accent">Run all 7</Btn>
-          </div>
+          <UnifiedScanCard tool={tool} fixture={fixture} />
 
-          {/* result fan-out */}
           <div className="row gap-2" style={{ marginBottom: 18, alignItems: "stretch", flexWrap: "wrap" }}>
             {(["reg", "op", "rep"] as const).map((riskKey) => {
               const groupTools = TOOLS.filter((t) => t.riskGroup === riskKey);
@@ -381,13 +390,12 @@ export default function HubPage() {
             })}
           </div>
 
-          {/* main work area */}
           <div className="row gap-4" style={{ alignItems: "stretch", flexWrap: "wrap" }}>
-            <PrioritiesPanel toolLabel={tool.label} />
+            <PrioritiesPanel tool={tool} fixture={fixture} />
             <div className="col gap-3" style={{ flex: "1 1 280px" }}>
               <RiskDimensionsRail />
-              <AgenticReadinessCard />
-              <ProtocolCompatList />
+              <AgenticReadinessCard fixture={fixture} />
+              <ProtocolCompatList fixture={fixture} />
             </div>
           </div>
         </main>
@@ -395,8 +403,6 @@ export default function HubPage() {
     </div>
   );
 }
-
-/* ── sidebar group ────────────────────────────────────────────── */
 
 function SidebarRiskGroup({
   label,
@@ -430,6 +436,7 @@ function SidebarRiskGroup({
         <button
           key={t.key}
           type="button"
+          data-tool-key={t.key}
           className={`side-item ${active === t.key ? "active" : ""}`}
           aria-pressed={active === t.key}
           onClick={() => setActive(t.key)}
@@ -453,8 +460,6 @@ function SidebarRiskGroup({
     </>
   );
 }
-
-/* ── plan footer ──────────────────────────────────────────────── */
 
 function PlanFooter() {
   return (
@@ -599,8 +604,6 @@ function PlanFooter() {
   );
 }
 
-/* ── small bits ───────────────────────────────────────────────── */
-
 function Stat({ n, label }: { n: string; label: string }) {
   return (
     <div
@@ -622,7 +625,8 @@ function Stat({ n, label }: { n: string; label: string }) {
   );
 }
 
-function PrioritiesPanel({ toolLabel }: { toolLabel: string }) {
+function PrioritiesPanel({ tool, fixture }: { tool: Tool; fixture: ToolFixture }) {
+  const rows = useMemo(() => fixture.priorities, [fixture]);
   return (
     <section
       className="card"
@@ -632,9 +636,9 @@ function PrioritiesPanel({ toolLabel }: { toolLabel: string }) {
       <div className="row between itemsCenter" style={{ marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
         <div>
           <Eyebrow>
-            <span id="priorities-heading">This week's priorities · {toolLabel}</span>
+            <span id="priorities-heading">This week's priorities · {tool.label}</span>
           </Eyebrow>
-          <MonoCall size="sm">4 actionable fixes · ~60 sec rescan</MonoCall>
+          <MonoCall size="sm">{rows.length} actionable fixes · ~60 sec rescan</MonoCall>
         </div>
         <div className="row gap-2">
           <Pill>All</Pill>
@@ -642,7 +646,7 @@ function PrioritiesPanel({ toolLabel }: { toolLabel: string }) {
           <Pill>P2</Pill>
         </div>
       </div>
-      {HUB_PRIORITIES.map((row) => (
+      {rows.map((row) => (
         <div
           key={row.title}
           className="data-row"
@@ -735,7 +739,7 @@ function RiskDimensionsRail() {
   );
 }
 
-function AgenticReadinessCard() {
+function AgenticReadinessCard({ fixture }: { fixture: ToolFixture }) {
   return (
     <section
       className="card"
@@ -756,7 +760,7 @@ function AgenticReadinessCard() {
       </h2>
       <div className="row gap-2 itemsCenter" style={{ marginTop: 6, alignItems: "baseline" }}>
         <div className="serif" style={{ fontSize: 34, lineHeight: 1, color: "var(--accent)" }}>
-          {AGENTIC_READINESS.score.value}
+          {fixture.agenticScore}
         </div>
         <MonoCall>/95 · BLOCKED</MonoCall>
       </div>
@@ -764,21 +768,20 @@ function AgenticReadinessCard() {
         className="mono-call"
         style={{ fontSize: 10, marginTop: 8, color: "var(--text-soft)", lineHeight: 1.5 }}
       >
-        3 agent blockers detected. OpenAI Operator, Google Commerce, Anthropic MCP cannot complete
-        checkout.
+        {fixture.agenticCopy}
       </div>
     </section>
   );
 }
 
-function ProtocolCompatList() {
+function ProtocolCompatList({ fixture }: { fixture: ToolFixture }) {
   return (
     <section className="card" style={{ padding: 14 }} aria-labelledby="protocol-heading">
       <Eyebrow style={{ marginBottom: 8 }}>
         <span id="protocol-heading">Protocol compatibility</span>
       </Eyebrow>
       <ul className="col gap-1" style={{ margin: 0, padding: 0, listStyle: "none" }}>
-        {AGENTIC_READINESS.protocols.map((p) => (
+        {fixture.protocols.map((p) => (
           <li
             key={p.name}
             className="row gap-2 itemsCenter"
