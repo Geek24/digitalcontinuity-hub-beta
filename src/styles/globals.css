@@ -48,9 +48,8 @@ button {
   *,
   *::before,
   *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+    transition: none !important;
+    animation: none !important;
     scroll-behavior: auto !important;
   }
 }
@@ -180,6 +179,12 @@ button {
   text-transform: uppercase;
   color: var(--text);
   background: var(--bg-card);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+button.pill:hover,
+a.pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 .pill .dot { width: 5px; height: 5px; }
 .pill-tone-reg { color: var(--text); border-color: color-mix(in srgb, var(--risk-reg) 55%, transparent); }
@@ -201,8 +206,16 @@ button {
   cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
-  transition: transform 0.12s ease, background 0.15s ease;
+  transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
   text-decoration: none;
+}
+.btn:hover { filter: brightness(1.05); }
+.btn:active:not([disabled]):not([aria-disabled="true"]) { transform: scale(0.98); }
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: none;
 }
 .btn-primary {
   background: var(--accent-2);
@@ -214,16 +227,30 @@ button {
   color: var(--text);
   border-color: var(--line-strong-c);
 }
+.btn-ghost:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
 .btn-rust,
 .btn-accent {
   background: var(--accent);
   color: white;
+}
+.btn-accent:hover {
+  background: color-mix(in srgb, var(--accent) 88%, black);
 }
 
 .card {
   background: var(--bg-card);
   border: 1px solid var(--line-c);
   border-radius: 10px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+a.card:hover,
+button.card:hover,
+.card.card-hoverable:hover {
+  border-color: var(--line-strong-c);
+  background: color-mix(in srgb, var(--accent) 3%, var(--bg-card));
+  cursor: pointer;
 }
 
 .section-rule {
@@ -301,6 +328,15 @@ button {
   font-family: inherit;
 }
 .side-item:hover { background: color-mix(in srgb, var(--accent-2) 6%, transparent); }
+.side-item:hover::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: color-mix(in srgb, var(--accent) 50%, transparent);
+}
 .side-item.active {
   color: var(--text);
   font-weight: 500;
