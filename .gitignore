@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-ssr
+.claude/
+.mcp.json
+*.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.env
+.env.local
+test-results/
+playwright-report/
+playwright/.cache/
+tsconfig.tsbuildinfo
+*.tsbuildinfo
