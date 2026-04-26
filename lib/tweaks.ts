@@ -1,5 +1,7 @@
+"use client";
+
 import { useEffect, useMemo, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 export type Theme = "enterprise" | "heritage" | "sage" | "inverse";
 export type Mode = "light" | "dark";
@@ -66,57 +68,56 @@ function writeStoredDefaults(tweaks: Tweaks) {
 }
 
 export function useTweaks() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const stored = useMemo(readStoredDefaults, []);
+  const stored = useMemo(() => readStoredDefaults(), []);
 
   const tweaks: Tweaks = useMemo(() => {
     const base: Tweaks = { ...DEFAULTS, ...stored };
+    const get = (k: string) => searchParams?.get(k) ?? null;
+    const pillarStr = String(base.pillarCount);
+    const pickedPillar = pick(
+      PILLAR_COUNTS.map((n) => String(n)),
+      get("pillarCount"),
+      pillarStr,
+    );
     return {
-      theme: pick(THEMES, searchParams.get("theme"), base.theme),
-      mode: pick(MODES, searchParams.get("mode"), base.mode),
-      hero: pick(HEROES, searchParams.get("hero"), base.hero),
-      grouping: pick(GROUPINGS, searchParams.get("grouping"), base.grouping),
-      pillarCount: pick(
-        PILLAR_COUNTS.map((n) => String(n) as unknown as PillarCount),
-        searchParams.get("pillarCount"),
-        String(base.pillarCount) as unknown as PillarCount,
-      ) as unknown as PillarCount,
-      density: pick(DENSITIES, searchParams.get("density"), base.density),
-      brandProminence: pick(BRAND_PROMINENCES, searchParams.get("brandProminence"), base.brandProminence),
+      theme: pick(THEMES, get("theme"), base.theme),
+      mode: pick(MODES, get("mode"), base.mode),
+      hero: pick(HEROES, get("hero"), base.hero),
+      grouping: pick(GROUPINGS, get("grouping"), base.grouping),
+      pillarCount: Number(pickedPillar) as PillarCount,
+      density: pick(DENSITIES, get("density"), base.density),
+      brandProminence: pick(BRAND_PROMINENCES, get("brandProminence"), base.brandProminence),
     };
   }, [searchParams, stored]);
 
-  // Coerce pillarCount string back to a number safely.
-  const numericPillarCount = useMemo<PillarCount>(() => {
-    const n = Number(tweaks.pillarCount);
-    return (PILLAR_COUNTS as number[]).includes(n) ? (n as PillarCount) : 3;
-  }, [tweaks.pillarCount]);
-
-  const finalTweaks: Tweaks = { ...tweaks, pillarCount: numericPillarCount };
-
   // apply data-theme + data-mode to <html>
   useEffect(() => {
+    if (typeof document === "undefined") return;
     const html = document.documentElement;
-    html.setAttribute("data-theme", finalTweaks.theme);
-    html.setAttribute("data-mode", finalTweaks.mode);
-  }, [finalTweaks.theme, finalTweaks.mode]);
+    html.setAttribute("data-theme", tweaks.theme);
+    html.setAttribute("data-mode", tweaks.mode);
+  }, [tweaks.theme, tweaks.mode]);
 
   // persist defaults for next visit
   useEffect(() => {
-    writeStoredDefaults(finalTweaks);
-  }, [finalTweaks]);
+    writeStoredDefaults(tweaks);
+  }, [tweaks]);
 
   const setTweak = useCallback(
     <K extends keyof Tweaks>(key: K, value: Tweaks[K]) => {
-      const next = new URLSearchParams(searchParams);
+      const next = new URLSearchParams(searchParams?.toString() ?? "");
       next.set(key, String(value));
-      setSearchParams(next, { replace: false });
+      const qs = next.toString();
+      router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
     },
-    [searchParams, setSearchParams],
+    [router, pathname, searchParams],
   );
 
-  return { tweaks: finalTweaks, setTweak };
+  return { tweaks, setTweak };
 }
 
 export const TWEAK_OPTIONS = {

@@ -1,7 +1,10 @@
-import { Link, NavLink } from "react-router-dom";
-import { Btn } from "@/components/atoms/Btn";
-import { Divider } from "@/components/atoms/Divider";
-import { ThemeSwitcher } from "@/components/atoms/ThemeSwitcher";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Btn } from "@/components/ui/Btn";
+import { Divider } from "@/components/ui/Divider";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useTweaks } from "@/lib/tweaks";
 
 export interface TopNavProps {
@@ -13,6 +16,7 @@ export interface TopNavProps {
 export function TopNav({ active = "landing", showMegaIndicator }: TopNavProps) {
   const { tweaks } = useTweaks();
   const { brandProminence } = tweaks;
+  const pathname = usePathname();
 
   const renewByline = (
     <span
@@ -86,24 +90,25 @@ export function TopNav({ active = "landing", showMegaIndicator }: TopNavProps) {
       </>
     );
 
+  const platformActive = active === "platform" || pathname === "/platform";
+  const toolsActive = pathname === "/";
+
   return (
     <nav className="topnav" aria-label="Primary">
-      <Link to="/" className="lockup" style={{ textDecoration: "none" }}>
+      <Link href="/" className="lockup" style={{ textDecoration: "none" }}>
         <span className="dc-mark" aria-hidden />
         {lockup}
       </Link>
       <div className="row gap-5 itemsCenter" style={{ marginLeft: 24 }}>
-        <NavLink
-          to="/platform"
-          className={({ isActive }) =>
-            `topnav-link ${isActive || active === "platform" ? "active" : ""}`
-          }
+        <Link
+          href="/platform"
+          className={`topnav-link ${platformActive ? "active" : ""}`}
         >
           Platform {showMegaIndicator ? "▾" : ""}
-        </NavLink>
-        <NavLink to="/" className="topnav-link" end>
+        </Link>
+        <Link href="/" className={`topnav-link ${toolsActive ? "active" : ""}`}>
           Tools
-        </NavLink>
+        </Link>
         <span className="topnav-link">Pricing</span>
         <span className="topnav-link">Story</span>
         <span className="topnav-link">Resources</span>

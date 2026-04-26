@@ -1,12 +1,14 @@
+"use client";
+
 import { useMemo } from "react";
 import { TopNav } from "@/components/shared/TopNav";
 import { Footer } from "@/components/shared/Footer";
-import { Btn } from "@/components/atoms/Btn";
-import { Pill } from "@/components/atoms/Pill";
-import { ToolGlyph } from "@/components/atoms/ToolGlyph";
-import { Eyebrow } from "@/components/atoms/Eyebrow";
-import { MonoCall } from "@/components/atoms/MonoCall";
-import { SectionRule } from "@/components/atoms/SectionRule";
+import { Btn } from "@/components/ui/Btn";
+import { Pill } from "@/components/ui/Pill";
+import { ToolGlyph } from "@/components/ui/ToolGlyph";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { MonoCall } from "@/components/ui/MonoCall";
+import { SectionRule } from "@/components/ui/SectionRule";
 import { useTweaks } from "@/lib/tweaks";
 import { TOOLS, RISK_LABEL, RISK_COPY, type Tool, type RiskGroup } from "@/lib/fixtures";
 
@@ -32,29 +34,38 @@ export default function LandingPage() {
     [],
   );
 
+  const buyerPillars: Pillar[] = useMemo(
+    () => [
+      {
+        key: "compliance",
+        label: "For compliance teams",
+        copy: "Evidence on demand for EAA, UFLPA, ADA.",
+        tools: TOOLS.filter((t) => ["checkout", "supply", "ground"].includes(t.key)),
+      },
+      {
+        key: "ops",
+        label: "For ops teams",
+        copy: "Lane, port, climate node exposure mapped.",
+        tools: TOOLS.filter((t) => ["logistics", "disaster"].includes(t.key)),
+      },
+      {
+        key: "product",
+        label: "For product teams",
+        copy: "Agentic readiness across the funnel.",
+        tools: TOOLS.filter((t) => ["ai", "domestic"].includes(t.key)),
+      },
+    ],
+    [],
+  );
+
+  const baseGroups = grouping === "buyer" ? buyerPillars : groupedByRisk;
+
   const pillars: Pillar[] =
     pillarCount === 3
-      ? groupedByRisk
+      ? baseGroups
       : pillarCount === 4
         ? [
-            {
-              key: "sc",
-              label: "Supply Chain",
-              copy: "Sourcing transparency, CSRD, UFLPA.",
-              tools: TOOLS.filter((t) => ["supply", "domestic"].includes(t.key)),
-            },
-            {
-              key: "co",
-              label: "Checkout",
-              copy: "Cross-origin payment iframes.",
-              tools: TOOLS.filter((t) => t.key === "checkout"),
-            },
-            {
-              key: "ax",
-              label: "Accessibility",
-              copy: "WCAG 2.2 AA / EAA exposure.",
-              tools: TOOLS.filter((t) => ["checkout", "ai"].includes(t.key)).slice(0, 1),
-            },
+            ...baseGroups,
             {
               key: "ag",
               label: "AI Agents",
@@ -63,7 +74,7 @@ export default function LandingPage() {
             },
           ]
         : [
-            ...groupedByRisk,
+            ...baseGroups,
             {
               key: "dev",
               label: "Developer",
@@ -148,8 +159,8 @@ export default function LandingPage() {
             </div>
 
             <div className="col stack-lg" style={{ gap: density === "dense" ? 14 : 22 }}>
-              {pillars.map((p) => (
-                <PillarRow key={p.key} pillar={p} />
+              {pillars.map((p, i) => (
+                <PillarRow key={p.key} pillar={p} idx={i} />
               ))}
             </div>
           </div>
@@ -315,7 +326,7 @@ function ProductLedHero() {
           }}
         >
           One pass returns Checkout · Supply Chain · Domestic Sourcing · GroundTruth — scored
-          together (cap 95, methodology pending) with this week's P1/P2 priorities. AI shopping
+          together (cap 95, methodology pending) with this week&apos;s P1/P2 priorities. AI shopping
           agents read your DOM the way screen readers do: every WCAG 2.2 / EAA fix is also an
           agentic commerce fix.
         </p>
@@ -340,11 +351,14 @@ function ProductLedHero() {
 
 /* ── pillar row ───────────────────────────────────────────────── */
 
-function PillarRow({ pillar }: { pillar: Pillar }) {
+function PillarRow({ pillar, idx }: { pillar: Pillar; idx: number }) {
   const tone =
     pillar.key === "reg" ? "reg" : pillar.key === "op" ? "op" : pillar.key === "rep" ? "rep" : null;
   return (
-    <div className="row gap-5" style={{ alignItems: "stretch", flexWrap: "wrap" }}>
+    <div
+      className={`row gap-5 ${idx >= 3 ? "fade-up" : ""}`}
+      style={{ alignItems: "stretch", flexWrap: "wrap" }}
+    >
       <div style={{ flex: "0 0 220px", padding: "4px 0" }}>
         <div className="row gap-2 itemsCenter" style={{ marginBottom: 6 }}>
           {tone && (
@@ -577,7 +591,7 @@ function DashboardPreview({ compact, onDark }: { compact?: boolean; onDark?: boo
           <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 10, color: muted }}>24 issues · 4/4 dimensions · SDG 2/17</div>
             <div style={{ fontSize: 9, color: muted, marginTop: 2 }}>
-              scanned 20× · +53 since last
+              scanned · +new since last
             </div>
           </div>
         </div>
@@ -596,7 +610,7 @@ function DashboardPreview({ compact, onDark }: { compact?: boolean; onDark?: boo
             marginBottom: 6,
           }}
         >
-          This week's priorities
+          This week&apos;s priorities
         </div>
         <DataLine k="P1 · 4 checkout a11y violations" v="agent blocked" onDark={onDark} tone="op" />
         <DataLine k="P1 · 5 supply chain reg gaps" v="UFLPA / CSRD" onDark={onDark} tone="reg" />

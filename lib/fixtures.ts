@@ -28,13 +28,9 @@ export interface Score {
 
 export interface Tool {
   key: ToolKey;
-  /** Public name, mirrors live nav order */
   label: string;
-  /** Short subtitle / one-liner */
   oneLiner: string;
-  /** Risk group for grouping */
   riskGroup: RiskGroup;
-  /** Glyph used by ToolGlyph */
   glyph: string;
   flagship?: true;
   patentPending?: true;
@@ -157,17 +153,18 @@ export const DIMENSIONS: Dimension[] = [
   { key: "cont", label: "Continuity", score: { value: 72, cap: 95, status: "OK" }, issueCount: 2 },
 ];
 
+/* IP guardrail: priority titles strip "AGENTREADY [number]" prefix and append the WCAG criterion as suffix. */
 export const PRIORITIES: Priority[] = [
   {
     rank: 1,
-    title: "AGENTREADY 1.1 · Cart cannot be summarized by agents",
+    title: "Cart cannot be summarized by AI agents · WCAG 3.3.2",
     criterion: "WCAG 3.3.2",
     toolKey: "checkout",
     severity: "CRITICAL",
   },
   {
     rank: 2,
-    title: "AGENTREADY 2.4 · Inputs lack autocomplete metadata",
+    title: "Inputs lack autocomplete metadata · WCAG 1.3.5",
     criterion: "WCAG 1.3.5",
     toolKey: "checkout",
     severity: "WARN",

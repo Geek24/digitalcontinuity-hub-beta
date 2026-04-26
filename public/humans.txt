@@ -7,7 +7,7 @@ Location: Cape Elizabeth, ME, USA
 Name: DigitalContinuity.ai · Beta · Hub Preview
 Status: Prototype — beta only
 Last update: 2026-04
-Made with: Vite, React 18, TypeScript, Tailwind v3, React Router v6
+Made with: Next.js 16, React 19, TypeScript, Tailwind v4
 Hosted on: Vercel
 
 /* NOTES */
