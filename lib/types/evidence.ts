@@ -1,0 +1,42 @@
+export type EvidenceRow = {
+  entity: string;
+  ticker: string;
+  eaa_liability: string;
+  policy_delta: string;
+  sdg_alignment: string;
+  sdg_target?: string;
+  raw_diff: string;
+  last_verified: string;
+  source_path: string;
+  exposure: number;
+  status: "pass" | "fail" | "review";
+  event_type: "content_diff" | "page_removed" | "statement_disappeared" | "static";
+  target_type: "esg" | "a11y" | "dei" | "supplier" | "human_rights";
+  before_status: "valid" | "soft_404" | "http_error" | "stub" | "redirect_away";
+  after_status: "valid" | "soft_404" | "http_error" | "stub" | "redirect_away";
+  before_statement_present: boolean;
+  after_statement_present: boolean;
+  before_confidence: number;
+  after_confidence: number;
+  before_keywords?: string[];
+  after_keywords?: string[];
+  removed_keywords?: string[];
+  added_keywords?: string[];
+  removed_lines?: number;
+  added_lines?: number;
+  classifier_reason?: string;
+  wayback_before?: string;
+  wayback_after?: string;
+  baseline_timestamp?: string;
+  current_timestamp?: string;
+};
+
+export type EvidenceIndex = {
+  scannerVersion: string;
+  mode: string;
+  baselineDate: string;
+  currentDate: string;
+  generatedAt: string;
+  rowCount: number;
+  rows: EvidenceRow[];
+};
