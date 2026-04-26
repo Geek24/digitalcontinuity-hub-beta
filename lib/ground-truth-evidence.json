@@ -4,7 +4,7 @@
   "baselineDate": "20240301",
   "currentDate": "20260420",
   "generatedAt": "2026-04-25T05:00:36.673Z",
-  "rowCount": 1,
+  "rowCount": 2,
   "rows": [
     {
       "entity": "Target Corp.",
@@ -65,6 +65,57 @@
       "wayback_after": "https://web.archive.org/web/20260422015058id_/https://corporate.target.com/sustainability-governance",
       "baseline_timestamp": "2024-02-27T12:26:26Z",
       "current_timestamp": "2026-04-22T01:50:58Z"
+    },
+    {
+      "entity": "IDEXX Laboratories",
+      "ticker": "IDXX",
+      "eaa_liability": "[FAIL: CROSS-ORIGIN VIOLATION]",
+      "policy_delta": "[STATEMENT REMOVED]",
+      "sdg_alignment": "[SILENT]",
+      "sdg_target": "SDG 3",
+      "raw_diff": "- [ESG statement present, conf=94, sustainably, ESG, emissions, Scope 1, renewable]\n+ [No longer present, conf=0, reason=below_min_words:36<80]",
+      "last_verified": "2026-04-26 00:59:07 UTC",
+      "source_path": "idexx.com/about-idexx/corporate-responsibility",
+      "exposure": 3,
+      "status": "fail",
+      "event_type": "statement_disappeared",
+      "target_type": "esg",
+      "before_status": "valid",
+      "after_status": "valid",
+      "before_statement_present": true,
+      "after_statement_present": false,
+      "before_confidence": 94,
+      "after_confidence": 0,
+      "before_keywords": [
+        "sustainably",
+        "ESG",
+        "emissions",
+        "Scope 1",
+        "renewable",
+        "supply chain",
+        "greenhouse gas"
+      ],
+      "after_keywords": [],
+      "removed_keywords": [
+        "diversity, equity, and inclusion",
+        "equity",
+        "inclusion",
+        "underrepresented",
+        "Scope 3",
+        "Emissions target",
+        "sustainability",
+        "human rights",
+        "committed to",
+        "accountability"
+      ],
+      "added_keywords": [],
+      "removed_lines": 84,
+      "added_lines": 1,
+      "classifier_reason": "keyword_asymmetry",
+      "wayback_before": "https://web.archive.org/web/20240214163523id_/https://www.idexx.com/en/about-idexx/corporate-responsibility/",
+      "wayback_after": "https://web.archive.org/web/20260314100646id_/https://www.idexx.com/en/about-idexx/corporate-responsibility/",
+      "baseline_timestamp": "2024-02-14T16:35:23Z",
+      "current_timestamp": "2026-03-14T10:06:46Z"
     }
   ]
 }
