@@ -9,6 +9,7 @@ import { ToolGlyph } from "@/components/ui/ToolGlyph";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { MonoCall } from "@/components/ui/MonoCall";
 import { ScoreBar } from "@/components/ui/ScoreBar";
+import { GroundTruthPanel } from "@/components/ui/GroundTruthPanel";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useTweaks } from "@/lib/tweaks";
 import {
@@ -391,7 +392,11 @@ export default function HubPage() {
           </div>
 
           <div className="row gap-4" style={{ alignItems: "stretch", flexWrap: "wrap" }}>
-            <PrioritiesPanel toolLabel={tool.label} />
+            {active === "ground" ? (
+              <GroundTruthPanel toolLabel={tool.label} />
+            ) : (
+              <PrioritiesPanel toolLabel={tool.label} />
+            )}
             <div className="col gap-3" style={{ flex: "1 1 280px" }}>
               <RiskDimensionsRail />
               <AgenticReadinessCard />
