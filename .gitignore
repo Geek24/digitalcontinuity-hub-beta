@@ -1,16 +1,28 @@
+# dependencies
 node_modules
-dist
-dist-ssr
-.claude/
-.mcp.json
-*.local
+
+# next.js
+.next/
+out/
+
+# misc
 .DS_Store
+*.local
 .vscode/*
 !.vscode/extensions.json
+
+# env
 .env
 .env.local
-test-results/
-playwright-report/
-playwright/.cache/
-tsconfig.tsbuildinfo
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
 *.tsbuildinfo
+next-env.d.ts
+
+# claude / mcp
+.claude/
+.mcp.json

@@ -1,11 +1,15 @@
-import { useState } from "react";
-import { Btn } from "@/components/atoms/Btn";
-import { Pill } from "@/components/atoms/Pill";
-import { ToolGlyph } from "@/components/atoms/ToolGlyph";
-import { Eyebrow } from "@/components/atoms/Eyebrow";
-import { MonoCall } from "@/components/atoms/MonoCall";
-import { ScoreBar } from "@/components/atoms/ScoreBar";
-import { ThemeSwitcher } from "@/components/atoms/ThemeSwitcher";
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { Btn } from "@/components/ui/Btn";
+import { Pill } from "@/components/ui/Pill";
+import { ToolGlyph } from "@/components/ui/ToolGlyph";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { MonoCall } from "@/components/ui/MonoCall";
+import { ScoreBar } from "@/components/ui/ScoreBar";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useTweaks } from "@/lib/tweaks";
 import {
   TOOLS,
@@ -18,11 +22,53 @@ import {
   type ToolKey,
 } from "@/lib/fixtures";
 
+const TOOL_KEYS: ToolKey[] = ["checkout", "logistics", "ground", "supply", "domestic", "disaster", "ai"];
+
+function isToolKey(s: string | null): s is ToolKey {
+  return s !== null && (TOOL_KEYS as string[]).includes(s);
+}
+
 export default function HubPage() {
   const { tweaks } = useTweaks();
   const { brandProminence, density } = tweaks;
-  const [active, setActive] = useState<ToolKey>("checkout");
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const active: ToolKey = useMemo(() => {
+    const v = searchParams?.get("tool") ?? null;
+    return isToolKey(v) ? v : "checkout";
+  }, [searchParams]);
+
+  const setActive = useCallback(
+    (k: ToolKey) => {
+      const next = new URLSearchParams(searchParams?.toString() ?? "");
+      next.set("tool", k);
+      router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams],
+  );
+
   const tool = TOOLS.find((t) => t.key === active)!;
+
+  // Arrow-key sidebar navigation
+  const sidebarRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      if (!sidebarRef.current?.contains(document.activeElement)) return;
+      e.preventDefault();
+      const idx = TOOL_KEYS.indexOf(active);
+      const nextIdx =
+        e.key === "ArrowDown"
+          ? (idx + 1) % TOOL_KEYS.length
+          : (idx - 1 + TOOL_KEYS.length) % TOOL_KEYS.length;
+      setActive(TOOL_KEYS[nextIdx]);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [active, setActive]);
 
   const lockup =
     brandProminence === "st-only" ? (
@@ -41,9 +87,8 @@ export default function HubPage() {
   return (
     <div
       className={`artboard ${density === "dense" ? "dense" : "sparse"}`}
-      style={{ display: "flex", flexDirection: "column", flex: 1 }}
+      style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: "100vh" }}
     >
-      {/* slim app bar */}
       <header
         style={{
           height: 44,
@@ -55,10 +100,10 @@ export default function HubPage() {
           background: "var(--bg)",
         }}
       >
-        <a href="/" className="lockup" style={{ textDecoration: "none" }}>
+        <Link href="/" className="lockup" style={{ textDecoration: "none" }}>
           <span className="dc-mark" style={{ width: 18, height: 18 }} aria-hidden />
           {lockup}
-        </a>
+        </Link>
         <span aria-hidden style={{ margin: "0 6px", color: "var(--line-strong-c)" }}>
           /
         </span>
@@ -94,9 +139,7 @@ export default function HubPage() {
       </header>
 
       <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
-        {/* sidebar */}
-        <aside className="sidebar" aria-label="App navigation">
-          {/* hero banner: ONE SCAN / ONE SURFACE */}
+        <aside ref={sidebarRef} className="sidebar" aria-label="App navigation">
           <div
             style={{
               margin: "0 12px 14px",
@@ -185,7 +228,6 @@ export default function HubPage() {
           <PlanFooter />
         </aside>
 
-        {/* main canvas */}
         <main
           id="main"
           style={{
@@ -194,7 +236,6 @@ export default function HubPage() {
             overflow: "auto",
           }}
         >
-          {/* breadcrumb + actions */}
           <div className="row between itemsCenter" style={{ marginBottom: 14, flexWrap: "wrap", gap: 12 }}>
             <div className="row gap-2 itemsCenter">
               <ToolGlyph t={tool} size={26} />
@@ -223,7 +264,6 @@ export default function HubPage() {
             </div>
           </div>
 
-          {/* WHY CHECKOUT strip */}
           <div
             className="card"
             style={{
@@ -258,7 +298,7 @@ export default function HubPage() {
               >
                 Checkout is where regulatory exposure (WCAG, EAA, UFLPA), operational risk (iframe
                 failures), and AI-agent visibility (whether Google or ChatGPT will even surface
-                you) all collide. We're the only audit that scores all three at once — plus the
+                you) all collide. We&apos;re the only audit that scores all three at once — plus the
                 upstream supply chain that feeds into it.
               </div>
               <div className="row gap-2" style={{ flex: "0 0 auto" }}>
@@ -269,40 +309,8 @@ export default function HubPage() {
             </div>
           </div>
 
-          {/* unified scan bar */}
-          <div
-            className="card"
-            style={{
-              padding: 10,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              marginBottom: 14,
-              flexWrap: "wrap",
-            }}
-          >
-            <MonoCall>scan ›</MonoCall>
-            <span
-              style={{
-                flex: 1,
-                padding: "6px 0",
-                fontFamily: "var(--font-mono)",
-                fontSize: 13,
-                minWidth: 200,
-              }}
-            >
-              checkout.shopify.com
-              <span className="cursor" aria-hidden>
-                |
-              </span>
-            </span>
-            <Pill tone="reg">Regulatory</Pill>
-            <Pill tone="op">Operational</Pill>
-            <Pill tone="rep">Reputational</Pill>
-            <Btn variant="accent">Run all 7</Btn>
-          </div>
+          <UnifiedScanCard activeTool={tool.label} />
 
-          {/* result fan-out */}
           <div className="row gap-2" style={{ marginBottom: 18, alignItems: "stretch", flexWrap: "wrap" }}>
             {(["reg", "op", "rep"] as const).map((riskKey) => {
               const groupTools = TOOLS.filter((t) => t.riskGroup === riskKey);
@@ -350,6 +358,7 @@ export default function HubPage() {
                             textAlign: "left",
                             color: "inherit",
                             fontFamily: "inherit",
+                            transition: "opacity 0.15s ease",
                           }}
                         >
                           <div className="row between itemsCenter" style={{ marginBottom: 2 }}>
@@ -381,7 +390,6 @@ export default function HubPage() {
             })}
           </div>
 
-          {/* main work area */}
           <div className="row gap-4" style={{ alignItems: "stretch", flexWrap: "wrap" }}>
             <PrioritiesPanel toolLabel={tool.label} />
             <div className="col gap-3" style={{ flex: "1 1 280px" }}>
@@ -392,6 +400,123 @@ export default function HubPage() {
           </div>
         </main>
       </div>
+    </div>
+  );
+}
+
+/* ── unified scan card with mock simulation ──────────────────── */
+
+type ScanState = "idle" | "scanning" | "done";
+
+function UnifiedScanCard({ activeTool }: { activeTool: string }) {
+  const [state, setState] = useState<ScanState>("idle");
+  const [progress, setProgress] = useState(0);
+
+  const reduced =
+    typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  const startScan = useCallback(() => {
+    if (state === "scanning") return;
+    setState("scanning");
+    setProgress(0);
+    if (reduced) {
+      setProgress(100);
+      setState("done");
+      return;
+    }
+    const start = Date.now();
+    const total = 2000;
+    const tick = () => {
+      const t = Math.min(1, (Date.now() - start) / total);
+      setProgress(Math.round(t * 100));
+      if (t < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        setState("done");
+      }
+    };
+    requestAnimationFrame(tick);
+  }, [state, reduced]);
+
+  const reset = () => {
+    setState("idle");
+    setProgress(0);
+  };
+
+  const buttonLabel =
+    state === "idle" ? "Run all 7" : state === "scanning" ? "Scanning…" : "View results";
+
+  return (
+    <div
+      className="card"
+      style={{
+        padding: 10,
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        marginBottom: 14,
+      }}
+    >
+      <div className="row gap-2 itemsCenter" style={{ flexWrap: "wrap" }}>
+        <MonoCall>scan ›</MonoCall>
+        <span
+          style={{
+            flex: 1,
+            padding: "6px 0",
+            fontFamily: "var(--font-mono)",
+            fontSize: 13,
+            minWidth: 200,
+          }}
+        >
+          checkout.shopify.com
+          <span className="cursor" aria-hidden>
+            |
+          </span>
+        </span>
+        <Pill tone="reg">Regulatory</Pill>
+        <Pill tone="op">Operational</Pill>
+        <Pill tone="rep">Reputational</Pill>
+        {state === "done" ? (
+          <Btn variant="ghost" onClick={reset}>
+            Reset
+          </Btn>
+        ) : (
+          <Btn
+            variant="accent"
+            disabled={state === "scanning"}
+            onClick={startScan}
+            ariaLabel={`Run scan for ${activeTool}`}
+          >
+            {buttonLabel}
+          </Btn>
+        )}
+      </div>
+      {state !== "idle" && (
+        <div role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+          <div
+            style={{
+              height: 4,
+              background: "var(--bg-raised)",
+              borderRadius: 2,
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                width: `${progress}%`,
+                height: "100%",
+                background: "var(--accent)",
+                transition: reduced ? "none" : "width 0.12s linear",
+              }}
+            />
+          </div>
+          <MonoCall style={{ marginTop: 4, display: "block", fontSize: 10 }}>
+            {state === "scanning"
+              ? `Scanning ${activeTool} · ${progress}%`
+              : `Scan complete · 24 issues found · 4/4 dimensions covered`}
+          </MonoCall>
+        </div>
+      )}
     </div>
   );
 }
@@ -632,7 +757,7 @@ function PrioritiesPanel({ toolLabel }: { toolLabel: string }) {
       <div className="row between itemsCenter" style={{ marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
         <div>
           <Eyebrow>
-            <span id="priorities-heading">This week's priorities · {toolLabel}</span>
+            <span id="priorities-heading">This week&apos;s priorities · {toolLabel}</span>
           </Eyebrow>
           <MonoCall size="sm">4 actionable fixes · ~60 sec rescan</MonoCall>
         </div>

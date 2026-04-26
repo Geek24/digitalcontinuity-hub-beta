@@ -1,88 +1,71 @@
-# DigitalContinuity.ai · Hub Beta · v0.1
+# DigitalContinuity.ai · Hub Beta
 
-Public, testable beta demonstrating the consolidated platform across three artboards
-(Landing · Marketing IA · In-product Hub) **without touching any live SmarterTariff or
-DigitalContinuity infrastructure**. Fixture-driven, `noindex` everywhere.
+Prototype-grade beta of the consolidated DigitalContinuity.ai platform. Three artboards (Landing, Platform, Hub), four AAA-tuned palettes × light/dark, fixture-only.
 
-> Spec source of truth: see the original handoff at `dc-hub-beta-handoff/` (README, COMPONENT-MAP, PALETTE-TOKENS, FIXTURES-SPEC).
+## Stack — matches production exactly
 
-## Stack
+This beta is built on the **same stack as the SmarterTariff production app** so it cannot accidentally introduce a new dependency that the prod scanner doesn't already vet. Versions are pinned to match `frontend/package.json` in the prod repo.
 
-- Vite 5
-- React 18 + TypeScript (strict)
-- React Router v6 (SPA)
-- Tailwind v3 + CSS custom properties (palette tokens)
-- Playwright + axe-core (visual regression + a11y)
-- Hosted on Vercel (sibling project, custom subdomain `hub-beta.digitalcontinuity.ai`)
+| | Version |
+|---|---|
+| Next.js | ^16.2.4 (App Router) |
+| React | 19.2.5 |
+| TypeScript | ^5.9.3 |
+| Tailwind CSS | ^4 (CSS-first config via `@import` in `app/globals.css`) |
+| ESLint | ^9 (flat config + `eslint-config-next@16.2.4`) |
+| Utility libs | `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react` |
 
-## Routes
+What is **not** here: no Vite, no React Router, no axe-core, no Playwright, no testing framework. This beta is human-eyeball-tested.
 
-| Path             | Purpose                              |
-| ---------------- | ------------------------------------ |
-| `/`              | Landing (artboard A)                 |
-| `/platform`      | Marketing IA / megamenu (artboard B) |
-| `/app`           | In-product Hub (artboard C)          |
-| `/about-this-beta` | Beta hygiene + IP guardrails       |
-| `*`              | 404                                  |
+## Run it
 
-## URL state contract
-
-```
-?theme=enterprise|heritage|sage|inverse  (default: enterprise)
-&mode=light|dark                         (default: light)
-&hero=editorial|product|scan             (Landing only, default: product)
-&grouping=risk|buyer                     (Landing/IA, default: risk)
-&pillarCount=3|4|5                       (Landing, default: 3)
-&density=sparse|dense                    (Hub only, default: dense)
-&brandProminence=dc-led|dc-only|st-only  (default: dc-led)
-```
-
-URL is the source of truth. `localStorage` only stores "default on next visit."
-
-## Local dev
-
-```sh
+```bash
 npm install
-npm run dev          # http://localhost:5173
-npm run typecheck
-npm run build
-npm run preview
-npm run test:visual  # Playwright + axe (requires browsers installed)
+npm run dev          # http://localhost:3000
+npm run build        # production build
+npm run lint         # eslint
 ```
 
-## Beta hygiene (non-negotiable, baked-in)
+## Layout
 
-- Beta banner on every route with `mailto:` injecting the current URL
-- `<meta name="robots" content="noindex, nofollow, noarchive">` + `X-Robots-Tag` header
-- `humans.txt` + `/about-this-beta` route
-- AAA-tuned palettes only (4 palettes × light/dark)
-- Reduced-motion respected
-- One `<h1>` per route, no skipped levels, focus-visible everywhere
+```
+app/
+├── layout.tsx                 # root layout, BetaBanner, VariantsPanel, noindex meta
+├── globals.css                # Tailwind v4 import + base styles
+├── styles/tokens.css          # 4 palettes × light/dark CSS custom properties
+├── page.tsx                   # Landing (artboard A)
+├── platform/page.tsx          # Platform IA (artboard B)
+├── app/page.tsx               # In-product Hub (artboard C, with v0.2 interactivity)
+├── about-this-beta/page.tsx   # About this beta
+└── not-found.tsx              # 404
+components/
+├── BetaBanner.tsx             # sticky beta strip with mailto
+├── ThemeSwitcher.tsx          # palette + mode dropdowns
+├── VariantsPanel.tsx          # tester-friendly drawer for URL state
+├── shared/                    # TopNav, Footer
+└── ui/                        # shadcn-style atoms (Btn, Pill, ToolGlyph, …)
+lib/
+├── fixtures.ts                # safe public fixture data
+├── tweaks.ts                  # URL state hook (next/navigation)
+└── utils.ts                   # cn helper (clsx + tailwind-merge)
+public/
+├── robots.txt                 # Disallow: /
+└── humans.txt
+```
 
-## IP guardrails (recap)
+## URL state
 
-| Allowed                                | Not allowed                                  |
-| -------------------------------------- | -------------------------------------------- |
-| Score cap of 95 (public)               | The formula behind /95                       |
-| Dimension counts ("24 issues · 4/4") | Per-signal scoring                           |
-| Protocol compat with pass/warn/fail    | Signal-detection logic                       |
-| WCAG criterion numbers (3.3.2 etc.)  | Criterion → revenue mapping                  |
-| "Patent pending" near methodology only | Plastered on every page                      |
-| Tool names + one-liners                | Internal tool architecture                   |
-| Pro plan / Unlimited copy              | Real customer counts, real revenue           |
+Every visual variant is a URL query param so feedback links capture exactly the state the tester saw. Example:
+`/?theme=heritage&mode=dark&hero=scan&grouping=buyer&pillarCount=5&brandProminence=dc-only`
 
-If unsure: does it appear on `smartertariff.ai` today? If yes, fine. If no, leave it out.
+Supported keys: `theme`, `mode`, `hero`, `grouping`, `pillarCount`, `density`, `brandProminence`, `tool` (Hub only).
 
-## Deploy → Vercel
+The Variants drawer (bottom-right) writes these for you and lets testers compare designs without touching the URL bar.
 
-1. Import this repo into Vercel (framework preset = Vite)
-2. No env vars required
-3. `Settings → Domains` → add `hub-beta.digitalcontinuity.ai`
-4. Add the CNAME at the DNS provider (NOT Cloudflare-proxied)
-5. Vercel auto-issues the cert
+## IP guardrails
 
-`vercel.json` ships with SPA rewrites + `X-Robots-Tag: noindex, nofollow`.
+See `app/about-this-beta/page.tsx` and `AUDIT-2026-04-25.md`. Scoring weights, signal-detection logic, and criterion → revenue mapping are intentionally not exposed. Priority titles strip internal numeric identifiers and surface only the public-facing WCAG criterion.
 
-## Owning company
+## Deploy
 
-Renew EcoMe LLC · contact: chris@smartertariff.com
+Vercel auto-deploys this branch. `vercel.json` enforces `X-Robots-Tag: noindex, nofollow, noarchive` plus a baseline of security headers.

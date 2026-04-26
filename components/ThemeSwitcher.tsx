@@ -1,3 +1,5 @@
+"use client";
+
 import { useTweaks, TWEAK_OPTIONS } from "@/lib/tweaks";
 
 export function ThemeSwitcher() {
@@ -5,9 +7,7 @@ export function ThemeSwitcher() {
   return (
     <div className="theme-switcher" aria-label="Theme controls">
       <label>
-        <span className="sr-only" style={{ position: "absolute", left: -9999 }}>
-          Palette
-        </span>
+        <span className="sr-only">Palette</span>
         Palette
         <select
           value={tweaks.theme}
@@ -22,9 +22,7 @@ export function ThemeSwitcher() {
         </select>
       </label>
       <label>
-        <span className="sr-only" style={{ position: "absolute", left: -9999 }}>
-          Mode
-        </span>
+        <span className="sr-only">Mode</span>
         Mode
         <select
           value={tweaks.mode}

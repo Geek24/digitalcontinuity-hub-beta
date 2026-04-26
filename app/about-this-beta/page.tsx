@@ -1,13 +1,16 @@
+import { Suspense } from "react";
 import { TopNav } from "@/components/shared/TopNav";
 import { Footer } from "@/components/shared/Footer";
-import { Eyebrow } from "@/components/atoms/Eyebrow";
-import { MonoCall } from "@/components/atoms/MonoCall";
-import { SectionRule } from "@/components/atoms/SectionRule";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { MonoCall } from "@/components/ui/MonoCall";
+import { SectionRule } from "@/components/ui/SectionRule";
 
 export default function AboutThisBetaPage() {
   return (
     <div className="artboard dense">
-      <TopNav active="landing" />
+      <Suspense fallback={null}>
+        <TopNav active="landing" />
+      </Suspense>
       <main id="main">
         <article
           className="vh-section"
@@ -34,6 +37,7 @@ export default function AboutThisBetaPage() {
             <li>Four AAA-tuned palettes × light/dark mode</li>
             <li>Driven entirely by URL query parameters and fixture data</li>
             <li>A safe substrate for design feedback and review</li>
+            <li>Built on the same Next.js 16 + Tailwind v4 stack as production</li>
           </ul>
 
           <h2 className="serif" style={{ fontSize: 22, marginTop: 20, marginBottom: 8 }}>
@@ -67,7 +71,7 @@ export default function AboutThisBetaPage() {
           </p>
 
           <SectionRule style={{ margin: "24px 0 12px" }} />
-          <MonoCall>Renew EcoMe LLC · Cape Elizabeth, ME · v0.1 · 2026</MonoCall>
+          <MonoCall>Renew EcoMe LLC · Cape Elizabeth, ME · v0.2 · 2026</MonoCall>
         </article>
       </main>
       <Footer />

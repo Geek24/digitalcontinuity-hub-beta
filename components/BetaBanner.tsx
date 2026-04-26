@@ -1,17 +1,20 @@
-import { useLocation } from "react-router-dom";
+"use client";
+
+import { usePathname, useSearchParams } from "next/navigation";
 
 export interface BetaBannerProps {
   email?: string;
 }
 
 export function BetaBanner({ email = "chris@smartertariff.com" }: BetaBannerProps) {
-  const location = useLocation();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  // Compose the mailto with the *current* URL (incl. query params) injected
+  const qs = searchParams && searchParams.toString() ? `?${searchParams.toString()}` : "";
   const currentUrl =
     typeof window !== "undefined"
       ? window.location.href
-      : `https://hub-beta.digitalcontinuity.ai${location.pathname}${location.search}`;
+      : `https://hub-beta.digitalcontinuity.ai${pathname ?? "/"}${qs}`;
 
   const mailto = `mailto:${email}?subject=${encodeURIComponent("DC Hub Beta feedback")}&body=${encodeURIComponent(`URL: ${currentUrl}\n\n`)}`;
 

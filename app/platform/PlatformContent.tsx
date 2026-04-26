@@ -1,12 +1,14 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { TopNav } from "@/components/shared/TopNav";
 import { Footer } from "@/components/shared/Footer";
-import { Btn } from "@/components/atoms/Btn";
-import { Pill } from "@/components/atoms/Pill";
-import { ToolGlyph } from "@/components/atoms/ToolGlyph";
-import { Eyebrow } from "@/components/atoms/Eyebrow";
-import { MonoCall } from "@/components/atoms/MonoCall";
-import { SectionRule } from "@/components/atoms/SectionRule";
+import { Btn } from "@/components/ui/Btn";
+import { Pill } from "@/components/ui/Pill";
+import { ToolGlyph } from "@/components/ui/ToolGlyph";
+import { Eyebrow } from "@/components/ui/Eyebrow";
+import { MonoCall } from "@/components/ui/MonoCall";
+import { SectionRule } from "@/components/ui/SectionRule";
 import { useTweaks } from "@/lib/tweaks";
 import { TOOLS, type ToolKey } from "@/lib/fixtures";
 
@@ -23,7 +25,6 @@ export default function PlatformPage() {
   const [megaOpen, setMegaOpen] = useState(true);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
-  // Esc closes the megamenu
   useEffect(() => {
     if (!megaOpen) return;
     function onKey(e: KeyboardEvent) {
@@ -79,7 +80,6 @@ export default function PlatformPage() {
     <div className={`artboard ${density === "dense" ? "dense" : "sparse"}`}>
       <TopNav active="platform" showMegaIndicator />
 
-      {/* hidden trigger for keyboard control of the megamenu */}
       <button
         ref={triggerRef}
         type="button"
@@ -251,7 +251,6 @@ export default function PlatformPage() {
           </section>
         )}
 
-        {/* IA / sitemap proposal */}
         <section
           className="vh-section"
           style={{

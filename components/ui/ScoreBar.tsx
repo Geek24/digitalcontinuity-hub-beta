@@ -37,9 +37,7 @@ export function ScoreBar({ value, max = 95, tone = "accent", label, status, styl
       style={style}
     >
       <i style={{ width: `${pct}%`, background: color }} />
-      <span className="sr-only" style={{ position: "absolute", left: -9999 }}>
-        {ariaText}
-      </span>
+      <span className="sr-only">{ariaText}</span>
     </div>
   );
 }
