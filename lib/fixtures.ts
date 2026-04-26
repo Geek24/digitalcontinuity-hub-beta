@@ -7,6 +7,12 @@
  *              criterion→revenue mapping, real customer data.
  */
 
+import groundTruthEvidence from "./ground-truth-evidence.json";
+import type { EvidenceIndex } from "./types/evidence";
+
+export const GROUND_TRUTH_EVIDENCE: EvidenceIndex = groundTruthEvidence as EvidenceIndex;
+export type { EvidenceRow, EvidenceIndex } from "./types/evidence";
+
 export type ToolKey =
   | "checkout"
   | "logistics"
